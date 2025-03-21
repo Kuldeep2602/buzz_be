@@ -2,7 +2,7 @@
 //create user schema
 import mongoose, {model , Schema} from "mongoose";
 
-mongoose.connect("mongodb+srv://Kuldeepsingh:Kuldeep%40123@cluster0.jnmfv.mongodb.net/brainly?retryWrites=true&w=majority&appName=cluster0")
+mongoose.connect("xxxxxx")
 
 const UserSchema = new Schema({
     username: {type: String, unique: true},
