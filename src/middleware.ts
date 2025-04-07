@@ -8,7 +8,10 @@ export const userMiddleware = (req: Request, res: Response,
         const decoded = jwt.verify(header as string , JWT_PASSWORD);
         if(decoded){
             //@ts-ignore
-            req.userId = decoded.indexOf;
+            // req.userId = decoded.indexOf;
+            req.userId = decoded.id;
+            //@ts-ignore
+            console.log("User ID set in request:", req.userId);
             next();
         }else{
             res.status(403).json({
@@ -16,3 +19,4 @@ export const userMiddleware = (req: Request, res: Response,
             })
         }
 }
+
