@@ -101,8 +101,8 @@ app.get('/api/v1/content', middleware_1.userMiddleware, (req, res) => __awaiter(
 app.delete('/api/v1/content', middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Delete route hit with body:", req.body);
     const contentId = req.body.contentId;
-    yield db_1.ContentModel.deleteMany({
-        contentId,
+    yield db_1.ContentModel.deleteOne({
+        _id: contentId,
         //@ts-ignore
         userId: req.userId
     });
