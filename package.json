@@ -4,9 +4,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc",
+    "build": "tsc && cp -r src/views dist/ 2>/dev/null || :",
     "dev": "nodemon src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "render-build": "npm install && npm run build"
   },
   "keywords": [],
   "author": "",

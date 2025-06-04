@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: buzz-be
+    env: node
+    buildCommand: npm run render-build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: buzz-db
+          property: connectionString
+
+databases:
+  - name: buzz-db
+    databaseName: buzz
+    user: buzz-user
+    plan: free
