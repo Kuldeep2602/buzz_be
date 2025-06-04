@@ -11,7 +11,10 @@ const userMiddleware = (req, res, next) => {
     const decoded = jsonwebtoken_1.default.verify(header, config_1.JWT_PASSWORD);
     if (decoded) {
         //@ts-ignore
-        req.userId = decoded.indexOf;
+        // req.userId = decoded.indexOf;
+        req.userId = decoded.id;
+        //@ts-ignore
+        console.log("User ID set in request:", req.userId);
         next();
     }
     else {

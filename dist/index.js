@@ -18,8 +18,10 @@ const db_1 = require("./db");
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const utils_1 = require("./utils");
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
+app.use((0, cors_1.default)());
 app.post('/api/v1/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // zod validation and hash password 
     const username = req.body.username;
@@ -60,42 +62,44 @@ app.post('/api/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
 }));
-// app.post('/api/v1/content', userMiddleware, async (req, res) => {
-//     const link = req.body.link;
-//     const type = req.body.type;
-//     await ContentModel.create({
-//         link,
-//         type,
-//         //@ts-ignore
-//         userId: req.userId,
-//         tags: []
-//     })
-//     return res.json({
-//         message: "Content added"
-//     })
-// })
 app.post('/api/v1/content', middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const link = req.body.link;
-    const type = req.body.type;
-    yield db_1.ContentModel.create({
-        link,
+    const { link, type, title, content, category } = req.body;
+    // Prepare the content object based on type
+    let contentObj = {
         type,
+        title,
         // @ts-ignore
         userId: req.userId,
         tags: []
-    });
-    res.json({ message: "Content added" }); // Send the response
+    };
+    if (type === 'youtube' || type === 'twitter') {
+        contentObj.link = link;
+    }
+    else if (type === 'minddrop') {
+        contentObj.content = content;
+    }
+    else if (type === 'savedlink') {
+        contentObj.link = link;
+        if (category)
+            contentObj.category = category;
+    }
+    yield db_1.ContentModel.create(contentObj);
+    console.log('Content created:', contentObj);
+    res.json({ message: "Content added" });
 }));
 app.get('/api/v1/content', middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // @ts-ignore
     const userId = req.userId;
     const content = yield db_1.ContentModel.find({
         userId: userId
     }).populate("userId", "username");
+    // The new schema supports type, content, category fields
     res.json({
         content
     });
 }));
 app.delete('/api/v1/content', middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Delete route hit with body:", req.body);
     const contentId = req.body.contentId;
     yield db_1.ContentModel.deleteMany({
         contentId,
@@ -110,6 +114,7 @@ app.post("/api/v1/brain/share", middleware_1.userMiddleware, (req, res) => __awa
     const share = req.body.share;
     if (share) {
         const existingLink = yield db_1.LinkModel.findOne({
+            //@ts-ignore
             userId: req.userId
         });
         if (existingLink) {
@@ -120,6 +125,7 @@ app.post("/api/v1/brain/share", middleware_1.userMiddleware, (req, res) => __awa
         }
         const hash = (0, utils_1.random)(10);
         yield db_1.LinkModel.create({
+            //@ts-ignore
             userId: req.userId,
             hash: hash
         });
@@ -129,7 +135,11 @@ app.post("/api/v1/brain/share", middleware_1.userMiddleware, (req, res) => __awa
     }
     else {
         yield db_1.LinkModel.deleteOne({
+            //@ts-ignore
             userId: req.userId
+        });
+        res.json({
+            message: "Link deleted"
         });
     }
 }));
@@ -161,4 +171,7 @@ app.post('/api/v1/brain/:shareLink', middleware_1.userMiddleware, (req, res) => 
         content: content
     });
 }));
-app.listen(3000);
+// app.listen(3000);
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server running on port ${process.env.PORT || 3000}`);
+});

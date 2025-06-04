@@ -56,21 +56,30 @@ app.post('/api/v1/signin',async (req, res) => {
 
 
 app.post('/api/v1/content', userMiddleware, async (req, res) => {
-    const link = req.body.link;
-    const type = req.body.type;
-  
-    await ContentModel.create({
-      link,
+    const { link, type, title, content, category } = req.body;
+
+    // Prepare the content object based on type
+    let contentObj: any = {
       type,
-      title: req.body.title, // Ensure title is included in the request body
+      title,
       // @ts-ignore
       userId: req.userId,
       tags: []
-    });
-    console.log(link); // Log the link for debugging
-  
-    res.json({ message: "Content added" }); // Send the response
-  });
+    };
+
+    if (type === 'youtube' || type === 'twitter') {
+      contentObj.link = link;
+    } else if (type === 'minddrop') {
+      contentObj.content = content;
+    } else if (type === 'savedlink') {
+      contentObj.link = link;
+      if (category) contentObj.category = category;
+    }
+
+    await ContentModel.create(contentObj);
+    console.log('Content created:', contentObj);
+    res.json({ message: "Content added" });
+});
 
 
 
@@ -80,7 +89,7 @@ app.get('/api/v1/content', userMiddleware, async (req, res) => {
     const content = await ContentModel.find({
         userId: userId
     }).populate("userId", "username");
-    console.log(content); // Log the content for debugging
+    // The new schema supports type, content, category fields
     res.json({
         content
     })
@@ -90,8 +99,8 @@ app.delete('/api/v1/content',userMiddleware, async (req, res) => {
     console.log("Delete route hit with body:", req.body);
     const contentId = req.body.contentId;
 
-    await ContentModel.deleteMany({
-        contentId,
+    await ContentModel.deleteOne({
+        _id: contentId,
         //@ts-ignore
         userId: req.userId
     })

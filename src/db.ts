@@ -22,10 +22,16 @@ export const UserModel = model("User", UserSchema);
 
 const ContentSchema = new Schema({
     title: String,
-    link: String,
-    tags:[{type: mongoose.Types.ObjectId, ref: 'Tag'}],
-    // type: String,
-    userId:[{type: mongoose.Types.ObjectId, ref: 'User', required: true}],
+    link: String, // For youtube, twitter, savedlink
+    content: String, // For minddrop (note body)
+    type: {
+      type: String,
+      enum: ['youtube', 'twitter', 'minddrop', 'savedlink'],
+      required: true
+    },
+    category: String, // Optional, for savedlink
+    tags: [{ type: mongoose.Types.ObjectId, ref: 'Tag' }],
+    userId: [{ type: mongoose.Types.ObjectId, ref: 'User', required: true }],
 })
 
 const LinkSchema = new Schema({
