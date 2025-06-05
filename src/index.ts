@@ -10,7 +10,16 @@ import cors from 'cors';
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+// Allow all origins for testing - in production, replace with your frontend URL
+app.use(cors({
+    origin: '*',  // For development only - in production, specify your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.post('/api/v1/signup', async (req, res) => {
     // zod validation and hash password 
